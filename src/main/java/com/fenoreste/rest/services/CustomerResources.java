@@ -12,9 +12,12 @@ import com.fenoreste.rest.ResponseDTO.CustomerSearchDTO;
 import com.fenoreste.rest.dao.CustomerDAO;
 import com.fenoreste.rest.dao.FacadeCustomer;
 import com.github.cliftonlabs.json_simple.JsonObject;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -263,17 +266,185 @@ public class CustomerResources {
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_JSON})
     public Response ValidateSetContactDetails(String cadena) {
-        JsonObject datosOk = null;
-        JsonObject datosError = null;
-        JsonObject NotFound = null;
+        JsonObject datosOk = new JsonObject();
+        JsonObject datosError = new JsonObject();
 
         JSONObject datosEntrada = new JSONObject(cadena);
-        String customerId = datosEntrada.getString("customerId").trim();
-        CustomerDAO datos = new CustomerDAO();
-        //Persona persona = datos.detailss(customerId);
-        FacadeCustomer f = null;
-
-        return Response.status(Response.Status.OK).entity(datosOk).build();
+        String customerId=datosEntrada.getString("customerId");
+        String tel1="",tel2="";
+        try {
+            System.out.println("ObjetoJson:"+datosEntrada);
+            JSONArray jsona=datosEntrada.getJSONArray("contactEntities");
+            JSONObject json1=(JSONObject) jsona.get(0);
+            JSONObject json2=(JSONObject) jsona.get(1);
+            tel1=json1.getString("phoneNumber");
+            tel2=json2.getString("phoneNumber");
+            System.out.println("Tel 1:"+tel1+",Tel 2:"+tel2);
+            
+        } catch (Exception e) {
+            System.out.println("Error:"+e.getMessage());
+        }
+        CustomerDAO dao=new CustomerDAO();
+        try {
+            String cadenas=dao.validateSetContactDetails(customerId, tel1);
+            if(cadenas.equals("")){
+                datosError.put("Error","No existe id de validacion");
+                return Response.status(Response.Status.NO_CONTENT).entity(datosError).build();
+            }
+            else{
+                datosOk.put("validationId",cadenas.toUpperCase());
+                return Response.status(Response.Status.OK).entity(datosOk).build();
+            }
+        } catch (Exception e) {
+            dao.cerrar();
+            System.out.println("Error general");
+            return null;
+        }finally{
+            dao.cerrar();
+        }
+        
     }
+    
+    @POST
+    @Path("/executeSetContactDetails")
+    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON})
+    public Response executeSetContactDetails(String cadena) {
+        JsonObject datosOk = new JsonObject();
+        JsonObject datosError = new JsonObject();
+
+        JSONObject datosEntrada = new JSONObject(cadena);
+        String validationId="";
+        try {
+        validationId=datosEntrada.getString("validationId");
+        } catch (Exception e) {
+        datosError.put("Error",validationId+" No es parametro reconocido");
+        return Response.status(Response.Status.BAD_GATEWAY).entity(datosError).build();
+        }
+        
+        CustomerDAO dao=new CustomerDAO();
+        try {
+           String status=dao.executeSetContactDetails(validationId);
+           datosOk.put("status", status);            
+         return Response.status(Response.Status.OK).entity(datosOk).build();
+        } catch (Exception e) {
+            dao.cerrar();
+        }
+        finally{
+            dao.cerrar();
+        }
+    return null;
+    }
+    
+    @POST
+    @Path("/position")
+    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON})
+    public Response GetPosition(String cadena) {
+        JsonObject datosOk = new JsonObject();
+        JsonObject datosError = new JsonObject();
+
+        JSONObject datosEntrada = new JSONObject(cadena);
+        String customerId="",balanceLedger="",balanceAvalaible="";
+        
+        try {
+        customerId=datosEntrada.getString("customerId");
+        JSONArray lista=datosEntrada.getJSONArray("balanceTypes");
+        balanceAvalaible=(String) lista.get(0);
+        balanceLedger=(String)lista.get(1);
+            System.out.println("Balance:"+balanceAvalaible+","+balanceLedger);
+        
+        } catch (Exception e) {
+           datosError.put("Error","Request Json Failed");
+        return Response.status(Response.Status.BAD_GATEWAY).entity(datosError).build();
+        }
+        
+        CustomerDAO dao=new CustomerDAO();
+        Double[]arr=new Double[2];
+          javax.json.JsonObject json1=null;
+        JsonArrayBuilder jsona=Json.createArrayBuilder();
+         
+         System.out.println("Json:"+json1);
+        try {
+           if(!balanceLedger.equals("") && !balanceAvalaible.equals("")){
+              arr=dao.position(customerId);              
+           } 
+           
+             javax.json.JsonObject clientes1=Json.createObjectBuilder().add("balanceType","ledger").add("amount",Json.createObjectBuilder().add("amount",arr[0]).add("currencyCode","MXN").build()).build();
+          javax.json.JsonObject clientes2=Json.createObjectBuilder().add("balanceType","avalaible").add("amount",Json.createObjectBuilder().add("amount",arr[1]).add("currencyCode","MXN").build()).build();
+         
+            json1=Json.createObjectBuilder().add("positionPerCurrency",jsona.add(Json.createObjectBuilder().add("currencyCode","MXN").add("balances",Json.createArrayBuilder().add(clientes1).add(clientes2)))).build();
+       
+           String status="";//dao.executeSetContactDetails(validationId);
+           datosOk.put("status", status);            
+         return Response.status(Response.Status.OK).entity(json1).build();
+        } catch (Exception e) {
+            dao.cerrar();
+        }
+        finally{
+            dao.cerrar();
+        }
+    return null;
+    }
+        
+        
+   @POST
+    @Path("/positionHistory")
+    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON})
+    public Response PositionHistory(String cadena) {
+        JsonObject datosOk = new JsonObject();
+        JsonObject datosError = new JsonObject();
+
+        JSONObject datosEntrada = new JSONObject(cadena);
+        String customerId="",balanceLedger="",balanceAvalaible="";
+        String fecha1="",fecha2="";
+        try {
+        customerId=datosEntrada.getString("customerId");
+        JSONArray lista=datosEntrada.getJSONArray("balanceTypes");
+        balanceAvalaible=(String) lista.get(0);
+        balanceLedger=(String)lista.get(1);
+            System.out.println("Balance:"+balanceAvalaible+","+balanceLedger);
+        JSONArray filters=datosEntrada.getJSONArray("filters");
+        JSONObject f1=filters.getJSONObject(0);
+        JSONObject f2=filters.getJSONObject(1);
+        fecha1=f1.getString("value");
+        fecha2=f2.getString("value");
+        } catch (Exception e) {
+           datosError.put("Error:","Request Json Failed");
+            System.out.println("Error:"+e.getMessage());
+        return Response.status(Response.Status.BAD_GATEWAY).entity(datosError).build();
+        }
+        
+        CustomerDAO dao=new CustomerDAO();
+        Double[]arr=new Double[2];
+        javax.json.JsonObject json1=null;
+        JsonArrayBuilder jsona=Json.createArrayBuilder();
+         
+        try {
+           if(!balanceLedger.equals("") && !balanceAvalaible.equals("")){
+              arr=dao.positionHistory(customerId,fecha1.trim().replace("-","/"),fecha2.trim().replace("-","/"));              
+           } 
+           
+          javax.json.JsonObject clientes1=Json.createObjectBuilder().add("balanceType","ledger").add("amount",Json.createObjectBuilder().add("amount",arr[0]).add("currencyCode","MXN").build()).build();
+          javax.json.JsonObject clientes2=Json.createObjectBuilder().add("balanceType","avalaible").add("amount",Json.createObjectBuilder().add("amount",arr[1]).add("currencyCode","MXN").build()).build();
+         
+            json1=Json.createObjectBuilder().add("positionPerCurrency",jsona.add(Json.createObjectBuilder()
+                    .add("currencyCode","MXN").add("balances",Json.createArrayBuilder().add(clientes1)
+                    .add(clientes2)))).add("positionDate",dao.dateToString(new Date()).replace("/","-")).build();
+       
+           String status="";//dao.executeSetContactDetails(validationId);
+           datosOk.put("status", status);            
+         return Response.status(Response.Status.OK).entity(json1).build();
+        } catch (Exception e) {
+            dao.cerrar();
+        }
+        finally{
+            dao.cerrar();
+        }
+    return null;
+    }
+    
+    
 
 }

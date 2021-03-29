@@ -11,23 +11,23 @@ package com.fenoreste.rest.ResponseDTO;
  */
 public class ClearingCodeRulesDTO {
      
-    private String code;
+    private String countryCode;
     private String charsetType;
 
     public ClearingCodeRulesDTO() {
     }
 
-    public ClearingCodeRulesDTO(String code, String charsetType) {
-        this.code = code;
+    public ClearingCodeRulesDTO(String countryCode, String charsetType) {
+        this.countryCode = countryCode;
         this.charsetType = charsetType;
     }
 
-    public String getCode() {
-        return code;
+    public String getCountryCode() {
+        return countryCode;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
     }
 
     public String getCharsetType() {
@@ -40,9 +40,9 @@ public class ClearingCodeRulesDTO {
 
     @Override
     public String toString() {
-        return "ClearingCodeRulesDTO{" + "code=" + code + ", charsetType=" + charsetType + '}';
+        return "ClearingCodeRulesDTO{" + "countryCode=" + countryCode + ", charsetType=" + charsetType + '}';
     }
-    
+
     
     
 }

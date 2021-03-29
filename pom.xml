@@ -73,6 +73,6 @@
         </dependency>
     </dependencies> 
     <build>
-        <finalName>webapp-sample3</finalName>
+        <finalName>Banca</finalName>
     </build>
 </project>

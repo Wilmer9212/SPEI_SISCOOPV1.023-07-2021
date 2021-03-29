@@ -6,9 +6,15 @@ import com.fenoreste.rest.ResponseDTO.CustomerDetailsDTO;
 import com.fenoreste.rest.ResponseDTO.CustomerSearchDTO;
 import com.fenoreste.rest.Util.AbstractFacade;
 import com.fenoreste.rest.entidades.Auxiliares;
+import com.fenoreste.rest.entidades.AuxiliaresD;
+import com.fenoreste.rest.entidades.AuxiliaresPK;
 import com.fenoreste.rest.entidades.CuentasSiscoop;
 import com.fenoreste.rest.entidades.Persona;
 import com.fenoreste.rest.entidades.PersonasPK;
+import com.fenoreste.rest.entidades.Productos;
+import com.fenoreste.rest.entidades.validaciones_telefono_siscoop;
+import java.security.SecureRandom;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.List;
@@ -18,6 +24,7 @@ import javax.persistence.Query;
 
 import java.util.ArrayList;
 import java.util.Date;
+import javax.persistence.EntityTransaction;
 
 public abstract class FacadeCustomer<T> {
 
@@ -48,7 +55,7 @@ public abstract class FacadeCustomer<T> {
             name = p.getNombre() + " " + p.getAppaterno() + " " + p.getApmaterno();
             taxId = p.getCurp();
             birthDate = p.getFechanacimiento();
-            if (p.getRazonSocial()==null) {
+            if (p.getRazonSocial() == null) {
                 customerType = "INDIVIDUAL";
             } else {
                 customerType = "GRUPAL";
@@ -85,11 +92,10 @@ public abstract class FacadeCustomer<T> {
 
             String customerId = ogs;
             String name = "", customerType = "";
-            
-            name = p.getNombre() + " " + p.getAppaterno() + " " + p.getApmaterno();
-            
 
-            if (p.getRazonSocial()==null) {
+            name = p.getNombre() + " " + p.getAppaterno() + " " + p.getApmaterno();
+
+            if (p.getRazonSocial() == null) {
                 customerType = "INDIVIDUAL";
             } else {
                 customerType = "GRUPAL";
@@ -98,10 +104,8 @@ public abstract class FacadeCustomer<T> {
                     customerId,
                     name,
                     customerType);
-            
-            
-            
-            System.out.println("cliente:"+client);
+
+            System.out.println("cliente:" + client);
             return client;
         } catch (Exception e) {
             System.out.println("Error al buscar cliente:" + e.getMessage());
@@ -122,7 +126,7 @@ public abstract class FacadeCustomer<T> {
         CustomerContactDetailsDTO contactsCellphone = new CustomerContactDetailsDTO();
         CustomerContactDetailsDTO contactsEmail = new CustomerContactDetailsDTO();
         List<CustomerContactDetailsDTO> ListaContactos = new ArrayList<CustomerContactDetailsDTO>();
-       
+
         try {
             int o = Integer.parseInt(ogs.substring(0, 6));
             int g = Integer.parseInt(ogs.substring(6, 8));
@@ -130,37 +134,36 @@ public abstract class FacadeCustomer<T> {
             System.out.println("ogs:" + o + "" + g + "" + s);
             PersonasPK pk = new PersonasPK(o, g, s);
             Persona p = em.find(Persona.class, pk);
-            
+
             /*query = em.createNativeQuery(consulta);
             ListaObjetos = query.getResultList();
             System.out.println("Size:" + ListaObjetos.size());
             for (Object[] obj : ListaObjetos) {
                 System.out.println("Ok:" + obj[0].toString());
                 if (!obj[0].toString().equals("0")) {*/
-            if(p.getTelefono()!=null){
-                    System.out.println("Entro");
-                    contactsPhone.setCustomerContactId(ogs);
-                    contactsPhone.setCustomerContactType("phone");
-                    contactsPhone.setPhoneNumber(p.getTelefono());
-                    ListaContactos.add(contactsPhone);
+            if (p.getTelefono() != null) {
+                System.out.println("Entro");
+                contactsPhone.setCustomerContactId(ogs);
+                contactsPhone.setCustomerContactType("phone");
+                contactsPhone.setPhoneNumber(p.getTelefono());
+                ListaContactos.add(contactsPhone);
 
-                }
-                //if (!obj[1].toString().equals("0")) {
-                  if(p.getCelular()!=null){    
-                    contactsCellphone.setCustomerContactId(ogs);
-                    contactsCellphone.setCustomerContactType("cellphone");
-                    contactsCellphone.setCellphoneNumber(p.getCelular());
-                    ListaContactos.add(contactsCellphone);
-                }
-                if (p.getEmail()!=null) {
-                    contactsEmail.setCustomerContactId(ogs);
-                    contactsEmail.setCustomerContactType("email");
-                    contactsEmail.setEmail(p.getEmail());
-                    
-                    ListaContactos.add(contactsEmail);
-                }
+            }
+            //if (!obj[1].toString().equals("0")) {
+            if (p.getCelular() != null) {
+                contactsCellphone.setCustomerContactId(ogs);
+                contactsCellphone.setCustomerContactType("cellphone");
+                contactsCellphone.setCellphoneNumber(p.getCelular());
+                ListaContactos.add(contactsCellphone);
+            }
+            if (p.getEmail() != null) {
+                contactsEmail.setCustomerContactId(ogs);
+                contactsEmail.setCustomerContactType("email");
+                contactsEmail.setEmail(p.getEmail());
 
-            
+                ListaContactos.add(contactsEmail);
+            }
+
             System.out.println("ListaContactos:" + ListaContactos);
 
             cerrar();
@@ -187,7 +190,7 @@ public abstract class FacadeCustomer<T> {
             Object[] arr = {};
             Object[] arr1 = {"relationCode", "SOW"};
             List<CustomerAccountDTO> listaDeCuentas = new ArrayList<CustomerAccountDTO>();
-           
+
             int idproducto = 0;
             int prod = 0;
             for (int k = 0; k < 1; k++) {
@@ -214,7 +217,7 @@ public abstract class FacadeCustomer<T> {
                     String op = String.format("%06d", a.getAuxiliaresPK().getIdorigenp()) + String.format("%05d", a.getAuxiliaresPK().getIdproducto());
                     String aa = String.format("%08d", a.getAuxiliaresPK().getIdauxiliar());
                     producto = new CustomerAccountDTO(
-                            op+aa,
+                            op + aa,
                             op + aa,
                             false,
                             accountType,
@@ -223,8 +226,8 @@ public abstract class FacadeCustomer<T> {
                             status,
                             arr,
                             arr1);
-                            listaDeCuentas.add(producto);
-                            accountType = "";
+                    listaDeCuentas.add(producto);
+                    accountType = "";
                 }
             }
             System.out.println("Lista de cuentas:" + listaDeCuentas);
@@ -253,6 +256,221 @@ public abstract class FacadeCustomer<T> {
         return bandera;
     }
 
+    public String validateSetContactDetails(String customerId, String phone1) {
+        EntityManager em = emf.createEntityManager();
+        String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
+        String CHAR_UPPER = CHAR_LOWER.toUpperCase();
+        String NUMBER = "0123456789";
+
+        String DATA_FOR_RANDOM_STRING = CHAR_LOWER + CHAR_UPPER + NUMBER;
+        SecureRandom random = new SecureRandom();
+        char rndChar = 0;
+        String cadena = "";
+        for (int i = 0; i < 12; i++) {
+            // 0-62 (exclusivo), retorno aleatorio 0-61
+            int rndCharAt = random.nextInt(DATA_FOR_RANDOM_STRING.length());
+            rndChar = DATA_FOR_RANDOM_STRING.charAt(rndCharAt);
+            String c = String.valueOf(rndChar);
+            cadena = cadena + c;
+        }
+
+        try {
+
+             EntityTransaction tr=em.getTransaction();
+            tr.begin();
+            em.createNativeQuery("UPDATE personas p SET celular='"+phone1.replace("+","")+
+                                "' WHERE replace(to_char(p.idorigen,'099999')||to_char(p.idgrupo,'09')||to_char(p.idsocio,'099999'),' ','')='" + customerId + "'").executeUpdate();
+            
+            validaciones_telefono_siscoop vl=new validaciones_telefono_siscoop(0,cadena.toUpperCase(),customerId,phone1);
+            em.persist(vl);
+            tr.commit();
+        } catch (Exception e) {
+            System.out.println("Error en validar datos");
+        }
+
+        return cadena;
+    }
+
+    public String executeSetContactDetails(String validationId) {
+        EntityManager em = emf.createEntityManager();
+        String estatus = "";
+        try {
+            String consulta = "SELECT * FROM validaciones_telefonos_siscoop WHERE validacion='" + validationId + "'";
+            Query query = em.createNativeQuery(consulta, validaciones_telefono_siscoop.class);
+            validaciones_telefono_siscoop dto = (validaciones_telefono_siscoop) query.getSingleResult();
+            EntityTransaction tr = em.getTransaction();
+            tr.begin();
+            int o = 0, p = 0, a = 0;
+            o = Integer.parseInt(dto.getCustomerid().substring(0, 6));
+            p = Integer.parseInt(dto.getCustomerid().substring(6, 8));
+            a = Integer.parseInt(dto.getCustomerid().substring(8, 14));
+
+            PersonasPK pk = new PersonasPK(o, p, a);
+            Persona pp = em.find(Persona.class, pk);
+            pp.setCelular(dto.getSettelefono());
+            em.persist(pp);
+            tr.commit();
+
+            if (pp.getCelular().equals(dto.getSettelefono())) {
+                estatus = "COMPLETED";
+            } else {
+                estatus = "INCOMPLETED";
+            }
+        } catch (Exception e) {
+            System.out.println("Error:" + e.getMessage());
+        }
+
+        return estatus;
+    }
+
+    public Double[] position(String customerId) {
+        EntityManager em = emf.createEntityManager();
+        Double ledGer=0.0,avalaible=0.0;
+        try {
+            String c = "SELECT * FROM auxiliares a"
+                    + " INNER JOIN productos pr USING(idproducto)"
+                    + " WHERE pr.tipoproducto in(0,1) AND replace(to_char(a.idorigen,'099999')||"
+                    + "to_char(a.idgrupo,'09')||to_char(a.idsocio,'099999'),' ','')='" + customerId.trim() + "'";
+            System.out.println("Consulta:"+c);
+            Query query = em.createNativeQuery(c, Auxiliares.class);
+            List<Auxiliares> lista = query.getResultList();
+            Double saldoAhorro = 0.0;
+            Double saldoDPF=0.0;
+            
+            Double saldoGarantia=0.0;
+            
+            for (int i = 0; i < lista.size(); i++) {
+                Auxiliares a = lista.get(i);
+                Productos pr = em.find(Productos.class, a.getAuxiliaresPK().getIdproducto());
+                Double garantiaDPF=0.0;
+                Double saldoAvalaibleDPF=0.0;
+                Double saldoLedgerDPF=0.0;
+                Double garantiaAhorro=0.0;
+                Double saldoAvalaibleAhorro=0.0;
+                Double saldoLedgerAhorro=0.0;
+                if (pr.getTipoproducto() == 1) {
+                    //Se suma fechaactivacion mas plazos para determinar si el producto ya se puede cobrar o aun no
+                    String cc = "SELECT a.fechaactivacion + " + Integer.parseInt(String.valueOf(a.getPlazo())) + " FROM auxiliares a WHERE a.idorigenp="
+                            + a.getAuxiliaresPK().getIdorigenp()
+                            + " AND a.idproducto=" + a.getAuxiliaresPK().getIdproducto()
+                            + " AND a.idauxiliar=" + a.getAuxiliaresPK().getIdauxiliar();
+                    Query query1 = em.createNativeQuery(cc);
+                    String fecha = String.valueOf(query1.getSingleResult()).replace("-", "/");
+                    Date hoy = new Date();
+                    Date fa = stringToDate(fecha);//fecha obtenida
+                    //si la fecha obtenida es igual al dia actual(hoy) o esta antes el dpf ya se puede retirar siempre y cuando no este amparando credito
+                 saldoLedgerDPF=saldoLedgerDPF+Double.parseDouble(a.getSaldo().toString());
+                    if (fa == hoy || fa.before(hoy)){
+                        //si el dpf tiene amparado credito
+                        if(Integer.parseInt(a.getGarantia().toString())>0){
+                          garantiaDPF=garantiaDPF+Double.parseDouble(a.getGarantia().toString());                        
+                          saldoAvalaibleDPF=saldoAvalaibleDPF+(Double.parseDouble(a.getSaldo().toString())-garantiaDPF);  
+                        }else{
+                          saldoAvalaibleDPF=Double.parseDouble(a.getSaldo().toString());
+                        }       
+                 //Si el dpf aun no se puede retirar
+                }
+                  
+                }else if(pr.getTipoproducto()==0){
+                saldoLedgerAhorro=saldoLedgerAhorro+Double.parseDouble(a.getSaldo().toString());
+                if(Double.parseDouble(a.getGarantia().toString())>0){                        
+                 garantiaAhorro= garantiaAhorro+Double.parseDouble(a.getGarantia().toString());
+                 saldoAvalaibleAhorro=saldoAvalaibleAhorro+ (Double.parseDouble(a.getSaldo().toString())-garantiaAhorro);
+                }else{
+                 saldoAvalaibleAhorro=saldoAvalaibleAhorro+Double.parseDouble(a.getSaldo().toString());
+                }
+              }
+              ledGer=ledGer+(saldoLedgerDPF+saldoLedgerAhorro);
+              avalaible=avalaible+(saldoAvalaibleDPF+saldoAvalaibleAhorro);
+            }          
+           
+           } catch (Exception e) {
+             e.getStackTrace();
+            System.out.println("Error:" + e.getMessage());
+        }
+        Double saldos[]=new Double[2];
+        saldos[0]=ledGer;
+        saldos[1]=avalaible;
+        System.out.println("Saldos:"+saldos[1]);
+        return saldos;
+    }
+    
+    public Double[] positionHistory(String customerId,String fecha1,String fecha2) {
+        EntityManager em = emf.createEntityManager();
+        Double ledGer=0.0,avalaible=0.0;
+        try {
+            String c = "SELECT * FROM auxiliares_d ad "
+                    + "INNER JOIN auxiliares a using(idorigenp,idproducto,idauxiliar)"
+                    + " INNER JOIN productos pr USING(idproducto)"
+                    + " WHERE pr.tipoproducto in(0,1) AND replace(to_char(a.idorigen,'099999')||"
+                    + "to_char(a.idgrupo,'09')||to_char(a.idsocio,'099999'),' ','')='" + customerId.trim() 
+                    + "' AND date(ad.fecha) between '"+fecha1+"' AND '"+fecha2+"'";
+            System.out.println("Consulta:"+c);
+            Query query = em.createNativeQuery(c, AuxiliaresD.class);
+            List<AuxiliaresD> lista = query.getResultList();
+           
+            for (int i = 0; i < lista.size(); i++) {
+                AuxiliaresD ad = lista.get(i);
+                AuxiliaresPK apk=new AuxiliaresPK(ad.getAuxiliaresDPK().getIdorigenp(),ad.getAuxiliaresDPK().getIdproducto(),ad.getAuxiliaresDPK().getIdauxiliar());
+                Auxiliares a=em.find(Auxiliares.class,apk);
+                System.out.println("paso");
+                Productos pr = em.find(Productos.class, a.getAuxiliaresPK().getIdproducto());
+                Double garantiaDPF=0.0;
+                Double saldoAvalaibleDPF=0.0;
+                Double saldoLedgerDPF=0.0;
+                Double garantiaAhorro=0.0;
+                Double saldoAvalaibleAhorro=0.0;
+                Double saldoLedgerAhorro=0.0;
+                if (pr.getTipoproducto() == 1) {
+                    //Se suma fechaactivacion mas plazos para determinar si el producto ya se puede cobrar o aun no
+                    String cc = "SELECT a.fechaactivacion + " + Integer.parseInt(String.valueOf(a.getPlazo())) + " FROM auxiliares a WHERE a.idorigenp="
+                            + a.getAuxiliaresPK().getIdorigenp()
+                            + " AND a.idproducto=" + a.getAuxiliaresPK().getIdproducto()
+                            + " AND a.idauxiliar=" + a.getAuxiliaresPK().getIdauxiliar();
+                    Query query1 = em.createNativeQuery(cc);
+                    String fecha = String.valueOf(query1.getSingleResult()).replace("-", "/");
+                    Date hoy = new Date();
+                    Date fa = stringToDate(fecha);//fecha obtenida
+                    //si la fecha obtenida es igual al dia actual(hoy) o esta antes el dpf ya se puede retirar siempre y cuando no este amparando credito
+                 saldoLedgerDPF=saldoLedgerDPF+Double.parseDouble(a.getSaldo().toString());
+                    if (fa == hoy || fa.before(hoy)){
+                        //si el dpf tiene amparado credito
+                        if(Integer.parseInt(a.getGarantia().toString())>0){
+                          garantiaDPF=garantiaDPF+Double.parseDouble(a.getGarantia().toString());                        
+                          saldoAvalaibleDPF=saldoAvalaibleDPF+(Double.parseDouble(a.getSaldo().toString())-garantiaDPF);  
+                        }else{
+                          saldoAvalaibleDPF=Double.parseDouble(a.getSaldo().toString());
+                        }       
+                 //Si el dpf aun no se puede retirar
+                }
+                  
+                }else if(pr.getTipoproducto()==0){
+                saldoLedgerAhorro=saldoLedgerAhorro+Double.parseDouble(a.getSaldo().toString());
+                if(Double.parseDouble(a.getGarantia().toString())>0){                        
+                 garantiaAhorro= garantiaAhorro+Double.parseDouble(a.getGarantia().toString());
+                 saldoAvalaibleAhorro=saldoAvalaibleAhorro+ (Double.parseDouble(a.getSaldo().toString())-garantiaAhorro);
+                }else{
+                 saldoAvalaibleAhorro=saldoAvalaibleAhorro+Double.parseDouble(a.getSaldo().toString());
+                }
+              }
+              ledGer=ledGer+(saldoLedgerDPF+saldoLedgerAhorro);
+              avalaible=avalaible+(saldoAvalaibleDPF+saldoAvalaibleAhorro);
+            }          
+           
+           } catch (Exception e) {
+             e.getStackTrace();
+            System.out.println("Error:" + e.getMessage());
+        }
+        Double saldos[]=new Double[2];
+        saldos[0]=ledGer;
+        saldos[1]=avalaible;
+        System.out.println("Saldos:"+saldos[1]);
+        return saldos;
+    }
+    
+    
+    
+
     public String dateToString(Date cadena) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
         String cadenaStr = sdf.format(cadena);
@@ -260,7 +478,16 @@ public abstract class FacadeCustomer<T> {
     }
 
     public Date stringToDate(String cadena) {
-        return null;
+        SimpleDateFormat formato = new SimpleDateFormat("yyyy/MM/dd");
+        Date fechaDate = null;
+
+        try {
+            fechaDate = formato.parse(cadena);
+        } catch (Exception ex) {
+            System.out.println("Error fecha:" + ex.getMessage());
+        }
+        System.out.println("fechaDate:" + fechaDate);
+        return fechaDate;
     }
 
     public void cerrar() {
