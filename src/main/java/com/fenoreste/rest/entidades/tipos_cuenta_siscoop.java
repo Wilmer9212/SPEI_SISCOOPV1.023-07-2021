@@ -2,31 +2,25 @@ package com.fenoreste.rest.entidades;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "tipos_cuenta_siscoop")
-public class CuentasSiscoop {
+public class tipos_cuenta_siscoop {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "idproducto")
   private Integer idproducto;
   
-  @Column(name = "producttypeid")
   private Integer producttypeid;
   
-  @Column(name = "producttypename")
   private String producttypename;
   
-  @Column(name = "descripcion")
   private String descripcion;
   
-  public CuentasSiscoop() {}
+  public tipos_cuenta_siscoop() {}
   
-  public CuentasSiscoop(Integer idproducto, Integer producttypeid, String producttypename, String descripcion) {
+  public tipos_cuenta_siscoop(Integer idproducto, Integer producttypeid, String producttypename, String descripcion) {
     this.idproducto = idproducto;
     this.producttypeid = producttypeid;
     this.producttypename = producttypename;
@@ -66,7 +60,6 @@ public class CuentasSiscoop {
   }
   
   public String toString() {
-    return "CuentasSiscoop{idproducto=" + this.idproducto + ", producttypeid=" + this.producttypeid + ", producttypename=" + this.producttypename + ", descripcion=" + this.descripcion + '}';
+    return "tipos_cuenta_siscoop{idproducto=" + this.idproducto + ", producttypeid=" + this.producttypeid + ", producttypename=" + this.producttypename + ", descripcion=" + this.descripcion + '}';
   }
 }
-
