@@ -1,8 +1,8 @@
  package com.fenoreste.rest.services;
  
 import com.fenoreste.rest.Auth.Security;
+import com.fenoreste.rest.Dao.ProductsDAO;
  import com.fenoreste.rest.ResponseDTO.ProductsDTO;
- import com.fenoreste.rest.Dao.ProductsDAO;
  import com.github.cliftonlabs.json_simple.JsonObject;
 import java.math.BigDecimal;
 import java.util.Calendar;
@@ -52,7 +52,7 @@ import org.json.JSONObject;
      JsonArrayBuilder arraycuentas = Json.createArrayBuilder();
      ProductsDAO pr = new ProductsDAO();
      try {
-       List<ProductsDTO> ListaProductos = pr.getProductos(accountType);
+       List<ProductsDTO> ListaProductos =pr.getProductos(accountType);
        if (ListaProductos != null) {
          for (int i = 0; i < ListaProductos.size(); i++) {
            JsonObjectBuilder data = Json.createObjectBuilder();
