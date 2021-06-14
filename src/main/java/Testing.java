@@ -1,11 +1,11 @@
 
 import com.fenoreste.rest.Util.AbstractFacade;
-import com.fenoreste.rest.entidades.Auxiliares;
-import com.fenoreste.rest.entidades.AuxiliaresPK;
-import com.fenoreste.rest.entidades.ReferenciasP;
-import com.fenoreste.rest.entidades.ReferenciasPPK;
-import com.fenoreste.rest.entidades.V_auxiliares;
-import com.fenoreste.rest.entidades.v_auxiliaresPK;
+import com.fenoreste.rest.Entidades.Auxiliares;
+import com.fenoreste.rest.Entidades.AuxiliaresPK;
+import com.fenoreste.rest.Entidades.ReferenciasP;
+import com.fenoreste.rest.Entidades.ReferenciasPPK;
+import com.fenoreste.rest.Entidades.V_auxiliares;
+import com.fenoreste.rest.Entidades.v_auxiliaresPK;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 

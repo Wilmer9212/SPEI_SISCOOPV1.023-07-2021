@@ -11,7 +11,7 @@ package com.fenoreste.rest.ResponseDTO;
  */
 public class ProductsDTO {
 
-    private Integer idproducto;
+    private String idproducto;
     private Integer producttypeid;
     private String producttypename;
     private String descripcion;
@@ -19,18 +19,18 @@ public class ProductsDTO {
     public ProductsDTO() {
     }
 
-    public ProductsDTO(Integer idproducto, Integer producttypeid, String producttypename, String descripcion) {
+    public ProductsDTO(String idproducto, Integer producttypeid, String producttypename, String descripcion) {
         this.idproducto = idproducto;
         this.producttypeid = producttypeid;
         this.producttypename = producttypename;
         this.descripcion = descripcion;
     }
 
-    public Integer getIdproducto() {
+    public String getIdproducto() {
         return idproducto;
     }
 
-    public void setIdproducto(Integer idproducto) {
+    public void setIdproducto(String idproducto) {
         this.idproducto = idproducto;
     }
 

@@ -12,7 +12,7 @@ package com.fenoreste.rest.ResponseDTO;
 public class CustomerAccountDTO {
     private String accountId;
     private String accountNumber;
-    private boolean displayAccountNumber;
+    private String displayAccountNumber;
     private String accountTye;
     private String currencyCode;
     private String productCode;
@@ -24,7 +24,7 @@ public class CustomerAccountDTO {
     public CustomerAccountDTO() {
     }
 
-    public CustomerAccountDTO(String accountId, String accountNumber, boolean displayAccountNumber, String accountTye, String currencyCode, String productCode, String status, Object[] restrictions, Object[] customerRelations) {
+    public CustomerAccountDTO(String accountId, String accountNumber, String displayAccountNumber, String accountTye, String currencyCode, String productCode, String status, Object[] restrictions, Object[] customerRelations) {
         this.accountId = accountId;
         this.accountNumber = accountNumber;
         this.displayAccountNumber = displayAccountNumber;
@@ -52,11 +52,11 @@ public class CustomerAccountDTO {
         this.accountNumber = accountNumber;
     }
 
-    public boolean getDisplayAccountNumber() {
+    public String getDisplayAccountNumber() {
         return displayAccountNumber;
     }
 
-    public void setDisplayAccountNumber(boolean displayAccountNumber) {
+    public void setDisplayAccountNumber(String displayAccountNumber) {
         this.displayAccountNumber = displayAccountNumber;
     }
 

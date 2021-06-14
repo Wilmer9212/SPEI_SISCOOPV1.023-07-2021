@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fenorest.rest.Auth;
+package com.fenoreste.rest.Auth;
 
 import com.fenoreste.rest.Util.AbstractFacade;
 import java.io.IOException;
@@ -58,18 +58,22 @@ public class Security {
         boolean bandera=false;
         
         EntityManagerFactory emf=AbstractFacade.conexion();
-        try {            
         EntityManager em=emf.createEntityManager();
+        try {            
+        
         String consulta="SELECT status FROM user_rest WHERE username='"+username+"' AND password='"+password+"'";
         Query query=em.createNativeQuery(consulta);
         boolean st=(Boolean) query.getSingleResult();
         if(st){
             bandera=true;
+        }else{
+            System.out.println("Error en autenticacion");
         }
         } catch (Exception e) {
             System.out.println("Error en status");
+            
         }
-        emf.close();
+        
         return bandera;
         
     }
