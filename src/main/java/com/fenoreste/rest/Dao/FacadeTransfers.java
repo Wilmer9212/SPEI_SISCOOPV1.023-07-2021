@@ -44,7 +44,7 @@ public abstract class FacadeTransfers<T> {
             String propcuentadestino,
             String fechaejecucion,
             String tipoejecucion) {
-
+        System.out.println("montoooooooooooooooooooooooooooooooooooooooo en facade:" + montoTransferencia);
         boolean bandera = false;
         Calendar c1 = Calendar.getInstance();
         String dia = Integer.toString(c1.get(Calendar.DATE));
@@ -54,16 +54,35 @@ public abstract class FacadeTransfers<T> {
         EntityManager em = emf.createEntityManager();
         String[] fees = new String[0];
         String validationId = "";
-        Query queryf=em.createNativeQuery("SELECT date(now())");
-        String fe=String.valueOf(queryf.getSingleResult());
-        Date hoy=new Date();
+        Query queryf = em.createNativeQuery("SELECT date(now())");
+        String fe = String.valueOf(queryf.getSingleResult());
+        Date hoy = new Date();
         try {
             System.out.println("aqui");
             if (findAccount(cuentaorigen, customerId) && findBalance(cuentaorigen, montoTransferencia)) {
                 validationId = RandomAlfa().toUpperCase();
                 System.out.println("aqui1");
-                if (tipotransferencia.equalsIgnoreCase("transfer_own")) {
-                    System.out.println("aqui2");
+                System.out.println("aqui2");
+                if (tipotransferencia.toUpperCase().contains("BIL")) {
+                    EntityTransaction tr = em.getTransaction();
+                    tr.begin();
+                    validaciones_transferencias_siscoop vl = new validaciones_transferencias_siscoop();
+                    vl.setCuentaorigen(cuentaorigen);
+                    vl.setCuentadestino(cuentadestino);
+                    vl.setTipotransferencia(tipotransferencia);
+                    vl.setComentario1(comentario);
+                    vl.setComentario2(propcuentadestino);
+                    vl.setCustomerId(customerId);
+                    vl.setFechaejecucion(hoy);
+                    vl.setMonto(montoTransferencia);
+                    vl.setTipoejecucion(tipoejecucion);
+                    vl.setEstatus(false);
+                    vl.setValidationId(validationId);
+
+                    em.persist(vl);
+                    tr.commit();
+                    bandera = true;
+                } else {
                     if (findAccount(cuentadestino, customerId)) {
                         EntityTransaction tr = em.getTransaction();
                         tr.begin();
@@ -79,14 +98,13 @@ public abstract class FacadeTransfers<T> {
                         vl.setTipoejecucion(tipoejecucion);
                         vl.setEstatus(false);
                         vl.setValidationId(validationId);
-                        
+
                         em.persist(vl);
                         tr.commit();
                         bandera = true;
                     }
                 }
             }
-
             if (bandera) {
                 dto = new validateMonetaryInstructionDTO(validationId, fees, fe);
             }
@@ -99,6 +117,7 @@ public abstract class FacadeTransfers<T> {
     }
 
     public String executeMonetaryInstruction(String validationId) {
+
         boolean bandera = false;
         Calendar c1 = Calendar.getInstance();
         String dia = Integer.toString(c1.get(Calendar.DATE));
@@ -108,15 +127,20 @@ public abstract class FacadeTransfers<T> {
         String mensaje = "";
         try {
             String consulta = "SELECT * FROM v_transferenciassiscoop WHERE validationid='" + validationId + "' ORDER BY fechaejecucion DESC LIMIT 1";
+            System.out.println("Siscoop");
             Query query = em.createNativeQuery(consulta, validaciones_transferencias_siscoop.class);
             validaciones_transferencias_siscoop vlt = (validaciones_transferencias_siscoop) query.getSingleResult();
-            
-            Query queryf=em.createNativeQuery("SELECT date(now())");
-            String fe=String.valueOf(queryf.getSingleResult()).replace("-","/");
-            System.out.println("fe:"+fe);
-            Date hoy=stringToDate(fe);
-            
-            System.out.println("hoy:"+hoy);
+            System.out.println("dfdsf");
+
+            Query queryf = em.createNativeQuery("SELECT date(now())");
+            String fe = String.valueOf(queryf.getSingleResult()).replace("-", "/");
+            System.out.println("fe:" + fe);
+            Date hoy = stringToDate(fe);
+            System.out.println("vali:" + vlt.getCuentaorigen());
+            String c2 = "SELECT saldo -"+vlt.getMonto()+" FROM auxiliares a where replace(to_char(a.idorigenp,'099999')||to_char(a.idproducto,'09999')||to_char(idauxiliar,'09999999'),' ','')='" + vlt.getCuentaorigen() + "'";
+            System.out.println("c2:" + c2);
+            Query query1 = em.createNativeQuery(c2);
+            Double saldo = Double.parseDouble(String.valueOf(query1.getSingleResult()));
             if (findBalance(vlt.getCuentaorigen(), vlt.getMonto())) {
                 EntityTransaction tr = em.getTransaction();
                 tr.begin();
@@ -131,17 +155,20 @@ public abstract class FacadeTransfers<T> {
                 vl.setMonto(vlt.getMonto());
                 vl.setTipoejecucion(vlt.getTipoejecucion());
                 vl.setEstatus(true);
-                em.persist(vl);
-                tr.commit();
+                vl.setRunningBalance(saldo);
                 bandera = true;
-                
+                if (bandera && aplicarCargos(vlt.getCuentaorigen(), vlt.getMonto(), 0)) {
+                    em.persist(vl);
+                    tr.commit();
+
+                    mensaje = "completed";
+                }
+
             }
-            
-            if (bandera && aplicarCargos(vlt.getCuentadestino(),vlt.getMonto(),1) && aplicarCargos(vlt.getCuentaorigen(),vlt.getMonto(),0)) {
-              mensaje = "completed";
-            }
+
         } catch (Exception e) {
-            System.out.println("Error:" + e.getMessage());
+            System.out.println("Error en execute:" + e.getMessage());
+            e.printStackTrace();
             em.close();
         }
         return mensaje;
@@ -184,7 +211,7 @@ public abstract class FacadeTransfers<T> {
         System.out.println("fechaDate:" + fechaDate);
         return fechaDate;
     }
-    
+
     private boolean findAccount(String accountId, String customerId) {
         EntityManager em = emf.createEntityManager();
         boolean bandera = false;
@@ -212,29 +239,29 @@ public abstract class FacadeTransfers<T> {
         Auxiliares a = (Auxiliares) query.getSingleResult();
         Double l = Double.parseDouble(monto.toString());
         Double s = Double.parseDouble(a.getSaldo().toString());
-        boolean bandera=false;
+        boolean bandera = false;
         try {
             if (tipocargo == 0) {
-            BigDecimal saldor = new BigDecimal(s - l);
-            EntityTransaction tr = em.getTransaction();
-            tr.begin();
-            a.setSaldo(saldor);
-            em.persist(a);
-            tr.commit();
-            bandera=true;
-        } else if (tipocargo == 1) {
-            BigDecimal saldor = new BigDecimal(s + l);
-            EntityTransaction tr = em.getTransaction();
-            tr.begin();
-            a.setSaldo(saldor);
-            em.persist(a);
-            tr.commit();
-            bandera=true;
-        }
+                BigDecimal saldor = new BigDecimal(s - l);
+                EntityTransaction tr = em.getTransaction();
+                tr.begin();
+                a.setSaldo(saldor);
+                em.persist(a);
+                tr.commit();
+                bandera = true;
+            } else if (tipocargo == 1) {
+                BigDecimal saldor = new BigDecimal(s + l);
+                EntityTransaction tr = em.getTransaction();
+                tr.begin();
+                a.setSaldo(saldor);
+                em.persist(a);
+                tr.commit();
+                bandera = true;
+            }
         } catch (Exception e) {
             em.close();
-            System.out.println("Error en cargos:"+e.getMessage());
-        }finally{
+            System.out.println("Error en cargos:" + e.getMessage());
+        } finally {
             em.close();
         }
         return bandera;

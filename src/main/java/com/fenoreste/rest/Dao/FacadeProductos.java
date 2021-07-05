@@ -13,8 +13,6 @@ import javax.persistence.Query;
 public abstract class FacadeProductos<T> {
   private static EntityManagerFactory emf;
   
-  private static final String PERSISTENCE_UNIT_NAME = "conexion";
-  
   public FacadeProductos(Class<T> entityClass) {
     emf = AbstractFacade.conexion();
   }
@@ -42,8 +40,9 @@ public abstract class FacadeProductos<T> {
       } 
       System.out.println("ListaProd:" + ListagetP.size());
     } catch (Exception e) {
-      cerrar();
+      em.close();
     } 
+    em.close();
     return ListagetP;
   }
   

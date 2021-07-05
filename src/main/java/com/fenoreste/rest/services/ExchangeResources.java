@@ -7,12 +7,10 @@ package com.fenoreste.rest.services;
 
 import com.fenoreste.rest.Auth.Security;
 import com.github.cliftonlabs.json_simple.JsonObject;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import javax.json.Json;
-import javax.json.JsonValue;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -35,20 +33,16 @@ public class ExchangeResources  {
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_JSON})
     public Response convertAmount(String cadena,@HeaderParam("authorization") String authString){
+        System.out.println("llegoooooooooooooooooooooooooooooooooooooooooooo");
     Security scr=new Security();
      if(!scr.isUserAuthenticated(authString)){
             return Response.status(Response.Status.UNAUTHORIZED).build();
      }
         JSONObject json=new JSONObject(cadena);
-        System.out.println("llego");
-        try {
-            
+        System.out.println("JSONConvertAmount:"+json);
+        try {            
             JSONObject jsonC=json.getJSONObject("amount");
             Double amount=jsonC.getDouble("amount");
-            String currencyCode=jsonC.getString("currencyCode");
-            String buyCurrencyCode=json.getString("buyCurrencyCode");
-            String sellCurrencyCode=json.getString("sellCurrencyCode");
-            String conversionRateType=json.getString("conversionRateType");
             
             JsonObject jsonResponse=new JsonObject();
             jsonResponse.put("amount",amount);
@@ -61,7 +55,6 @@ public class ExchangeResources  {
         } catch (Exception e) {
             System.out.println("Error al retornar objetos:"+e.getMessage());
         }
-        System.out.println("nssalio");
         return null;
     }
     
@@ -103,7 +96,6 @@ public class ExchangeResources  {
         } catch (Exception e) {
             System.out.println("Error al retornar objetos:"+e.getMessage());
         }
-        System.out.println("nssalio");
         return null;
     }
 }
