@@ -6,10 +6,10 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
-@ApplicationPath("gateway")
+@ApplicationPath("api/v1.0")
 public class Application extends ResourceConfig {
     public Application() {
-        packages("com.fenoreste.rest.services");
+        packages("com.fenoreste.spei.services");
         register(JacksonFeature.class);
         register(RolesAllowedDynamicFeature.class);
     }
